@@ -64,6 +64,8 @@ void training_cycle(struct som_t *map, double inputs[][DIM_DATA]) {
     ++(map->t);
     if (map->t % 1000 == 0)
 	--(map->N_size);
+
+    alpha = 0.9 * (1 - (map->t/1000));
     
     for (int i = 0; i < NUM_DATA; ++i) {
 	c = find_best_match(inputs[i], map);
@@ -71,7 +73,6 @@ void training_cycle(struct som_t *map, double inputs[][DIM_DATA]) {
 	for (int j = 0; j < DIM_MAPY; ++j) {
 	    for (int k = 0; k < DIM_MAPX; ++k) {
 		if (node_dist(c, &(map->nodes[j][k])) <= map->N_size) {
-		    alpha = 0.9 * (1 - (map->t/1000));
 		    for (int l = 0; l < DIM_DATA; ++l) {
 			map->nodes[j][k].model[l] = alpha * (inputs[i][l] - map->nodes[j][k].model[l]);
 		    }
