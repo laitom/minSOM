@@ -21,6 +21,18 @@ void test_init_map_and_init_node() {
 	}
     }
 
+    if (DIM_MAPX < DIM_MAPY) {
+	assert(map.N_size >= DIM_MAPX);
+	assert(map.N_size <= DIM_MAPY);
+    }
+    else if (DIM_MAPX > DIM_MAPY) {
+	assert(map.N_size <= DIM_MAPX);
+	assert(map.N_size >= DIM_MAPY);
+    }
+    else {
+	assert(map.N_size == DIM_MAPX+1);
+    }
+
     printf("OK\n");
 }
 
@@ -33,6 +45,18 @@ void test_random_double() {
 	assert(d >= -4.567);
 	assert(d <= 13.4);
     }
+
+    printf("OK\n");
+}
+
+void test_node_dist() {
+    printf("Testing node_dist()... ");
+
+    struct som_t map;
+    init_map(&map);
+
+    assert(node_dist(&(map.nodes[0][0]), &(map.nodes[2][4])) > 4.472);
+    assert(node_dist(&(map.nodes[0][0]), &(map.nodes[2][4])) < 4.473);
 
     printf("OK\n");
 }
@@ -75,9 +99,50 @@ void test_find_best_match() {
     printf("OK\n");
 }
 
+void test_training_cycle() {
+    printf("Testing training_cycle()...\n");
+
+    struct som_t map;
+    init_map(&map);
+
+    double inputs[][DIM_DATA] = {
+	{ 0.0, 0.0, 0.0, 0.0, 0.0 },
+	{ 100.0, 100.0, 100.0, 100.0, 100.0 },
+	{ 0.0, 0.0, 0.0, 0.0, 0.0 },
+	{ 100.0, 100.0, 100.0, 100.0, 100.0 },
+	{ 0.0, 0.0, 0.0, 0.0, 0.0 }
+    };
+
+    for (int i = 0; i < DIM_MAPY; ++i) {
+	for (int j = 0; j < DIM_MAPX; ++j) {
+	    printf("%d,%d: ", map.nodes[i][j].pos_x, map.nodes[i][j].pos_y);
+	    for (int k = 0; k < DIM_DATA; ++k)
+		printf("%lf ", map.nodes[i][j].model[k]);
+	    printf("\n");
+	}
+    }
+    printf("\n");
+
+    for (int i = 0; i < 1000; ++i)
+	training_cycle(&map, inputs);
+
+    for (int i = 0; i < DIM_MAPY; ++i) {
+	for (int j = 0; j < DIM_MAPX; ++j) {
+	    printf("%d,%d: ", map.nodes[i][j].pos_x, map.nodes[i][j].pos_y);
+	    for (int k = 0; k < DIM_DATA; ++k)
+		printf("%lf ", map.nodes[i][j].model[k]);
+	    printf("\n");
+	}
+    }
+
+    printf("OK\n");
+}
+
 int main(int argc, char *argv[]) {
     test_init_map_and_init_node();
     test_random_double();
+    test_node_dist();
     test_euclidean_dist();
     test_find_best_match();
+    test_training_cycle();
 }

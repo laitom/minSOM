@@ -11,6 +11,7 @@ void init_map(struct som_t *map) {
 	for (int j = 0; j < DIM_MAPX; ++j)
 	    init_node(&(map->nodes[i][j]), j, i);
 
+    map->N_size = node_dist(&(map->nodes[0][0]), &(map->nodes[DIM_MAPY-1][DIM_MAPX-1])) / 2 + 1;
     map->t = 0;
 }
 
@@ -24,6 +25,10 @@ void init_node(struct node_t *node, int x, int y) {
 
 double random_double(double n, double m) {
     return n + (rand() / (RAND_MAX / (m-n)));
+}
+
+double node_dist(struct node_t *node1, struct node_t *node2) {
+    return sqrt(pow(node2->pos_x - node1->pos_x, 2) + pow(node2->pos_y - node1->pos_y, 2));
 }
 
 double euclidean_dist(double x[], double m[], int dim) {
@@ -51,36 +56,29 @@ struct node_t *find_best_match(double x[], struct som_t *map) {
 
     return c;
 }
-/*
-int main(int argc, char *argv[]) {
-    srand(time(NULL));
+
+void training_cycle(struct som_t *map, double inputs[][DIM_DATA]) {
+    struct node_t *c;
     
-    struct som_t som;
-    init_map(&som);
+    ++(map->t);
+    if (map->t % 1000 == 0)
+	--(map->N_size);
+    
+    for (int i = 0; i < NUM_DATA; ++i) {
+	c = find_best_match(inputs[i], map);
 
-    double x[] = { 0, 0, 0, 0, 0 };
-    struct node_t *winner = find_best_match(x, &som);
-    printf("%d,%d\n\n", winner->pos_x, winner->pos_y);
-
-    for (int i = 0; i < DIM_MAPY; ++i) {
-	for (int j = 0; j < DIM_MAPX; ++j) {
-	    printf("%d,%d: ", som.nodes[i][j].pos_x, som.nodes[i][j].pos_y);
-	    for (int k = 0; k < DIM_DATA; ++k)
-		printf("%lf ", som.nodes[i][j].model[k]);
-	    printf("\n");
+	for (int j = 0; j < DIM_MAPY; ++j) {
+	    for (int k = 0; k < DIM_MAPX; ++k) {
+		if (node_dist(c, &(map->nodes[j][k])) <= map->N_size) {
+		    double smoothed;
+		    
+		    for (int l = 0; l < DIM_DATA; ++l) {
+			smoothed = inputs[i][l] - map->nodes[j][k].model[l];
+			smoothed *= 0.9 * (1 - (map->t/1000));
+			map->nodes[j][k].model[l] = smoothed;
+		    }
+		}
+	    }
 	}
     }
-    
-    printf("%d,%d: ", som.nodes[0][1].pos_x, som.nodes[0][1].pos_y);
-    for (int i = 0; i < DIM_DATA; ++i)
-	printf("%lf ", som.nodes[0][1].model[i]);
-    printf("\n\n");
-
-    double x[] = {2, -1};
-    double m[] = {-2, 2};
-    double d = euclidean_dist(x, m, 2);
-    printf("%lf\n", d);
-
-    return 0;
-    }
-*/
+}
