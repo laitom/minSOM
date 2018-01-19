@@ -6,7 +6,7 @@
 void test_init_map_and_init_node() {
     printf("Testing init_map() and init_node()... ");
 
-    struct som_t map;
+    struct som map;
     init_map(&map);
 
     for (int i = 0; i < DIM_MAPY; ++i) {
@@ -52,7 +52,7 @@ void test_random_double() {
 void test_node_dist() {
     printf("Testing node_dist()... ");
 
-    struct som_t map;
+    struct som map;
     init_map(&map);
 
     assert(node_dist(&(map.nodes[0][0]), &(map.nodes[2][4])) > 4.472);
@@ -79,20 +79,20 @@ void test_euclidean_dist() {
 void test_find_best_match() {
     printf("Testing find_best_match()... ");
 
-    struct som_t map;
+    struct som map;
     init_map(&map);
 
     double x[] = { 1.0, 1.0, 1.0, 1.0, 1.0 };
     
-    struct node_t *should_win = &(map.nodes[1][2]);
+    struct node *should_win = &(map.nodes[1][2]);
     for (int i = 0; i < DIM_DATA; ++i)
 	should_win->model[i] = x[i]-0.001;
     
-    struct node_t *should_not_win = &(map.nodes[3][0]);
+    struct node *should_not_win = &(map.nodes[3][0]);
     for (int i = 0; i < DIM_DATA; ++i)
 	should_win->model[i] = x[i]-0.01;
     
-    struct node_t *winner = find_best_match(x, &map);
+    struct node *winner = find_best_match(x, &map);
     assert(winner == should_win);
     assert(winner != should_not_win);
 
@@ -102,7 +102,7 @@ void test_find_best_match() {
 void test_training_cycle() {
     printf("Testing training_cycle()...\n");
 
-    struct som_t map;
+    struct som map;
     init_map(&map);
 
     double inputs[][DIM_DATA] = {

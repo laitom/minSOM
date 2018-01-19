@@ -6,7 +6,7 @@
 
 #include "minsom.h"
 
-void init_map(struct som_t *map) {
+void init_map(struct som *map) {
     for (int i = 0; i < DIM_MAPY; ++i)
 	for (int j = 0; j < DIM_MAPX; ++j)
 	    init_node(&(map->nodes[i][j]), j, i);
@@ -15,7 +15,7 @@ void init_map(struct som_t *map) {
     map->t = 0;
 }
 
-void init_node(struct node_t *node, int x, int y) {
+void init_node(struct node *node, int x, int y) {
     for (int i = 0; i < DIM_DATA; ++i)
 	node->model[i] = random_double(MODEL_INIT_MIN, MODEL_INIT_MAX);
 
@@ -27,7 +27,7 @@ double random_double(double n, double m) {
     return n + (rand() / (RAND_MAX / (m-n)));
 }
 
-double node_dist(struct node_t *node1, struct node_t *node2) {
+double node_dist(struct node *node1, struct node *node2) {
     return sqrt(pow(node2->pos_x - node1->pos_x, 2) + pow(node2->pos_y - node1->pos_y, 2));
 }
 
@@ -40,8 +40,8 @@ double euclidean_dist(double x[], double m[], int dim) {
     return sqrt(sum);
 }
 
-struct node_t *find_best_match(double x[], struct som_t *map) {
-    struct node_t *c;
+struct node *find_best_match(double x[], struct som *map) {
+    struct node *c;
     double min_dist = DBL_MAX, temp_dist;
 
     for (int i = 0; i < DIM_MAPY; ++i) {
@@ -57,8 +57,8 @@ struct node_t *find_best_match(double x[], struct som_t *map) {
     return c;
 }
 
-void training_cycle(struct som_t *map, double inputs[][DIM_DATA]) {
-    struct node_t *c;
+void training_cycle(struct som *map, double inputs[][DIM_DATA]) {
+    struct node *c;
     double alpha;
     
     ++(map->t);
